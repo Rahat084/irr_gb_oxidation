@@ -7,12 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "irr_gb_oxidationTestApp.h"
+/**
+ * Example 2: Kernel - Creating your first custom Kernel
+ * This example augments the first example (Input File) by adding a custom kernel
+ * to apply a convection operator to the domain.
+ */
+
+#include "irr_gb_oxidationApp.h"
 #include "MooseMain.h"
 
 // Begin the main program.
 int
 main(int argc, char * argv[])
 {
-  return Moose::main<irr_gb_oxidationTestApp>(argc, argv);
+  return Moose::main<irr_gb_oxidationApp>(argc, argv);
 }
