@@ -41,7 +41,7 @@ GrainBoundaryDrift::GrainBoundaryDrift(const InputParameters & parameters)
     _gbNormalStress(coupledValue("grain_boundary_normal_stress")),
     _gbNormalStressGradient(coupledGradient("grain_boundary_normal_stress"))
 {
-    _coeff = _Vatom /(_k*_T);
+    _coeff = _Vatom /(_k *_T);
 }
 
 Real
