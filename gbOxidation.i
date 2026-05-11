@@ -8,33 +8,35 @@
     type = TransformGenerator
     input = fmg
     transform = SCALE
-    vector_value = '1.5e-3 1.5e-3 1.5e-3'
+    vector_value = '1.49e-3 1.49e-3 1.49e-3'
   []
 []
 
-#[UserObjects]
-#  [./soln]
-#    type = SolutionUserObject
-#    mesh = irrFCC_poly_5dpa.e
-#    system_variables = stress_hydro
-#    timestep = 2500
-#  [../]
-#[]
-#
-#[AuxVariables]
-#  [./grainBoundaryNormalStress]
-#    order = FIRST
-#    family = LAGRANGE
-#  [../]
-#[]
-#
-#[AuxKernels]
-#  [./grainBoundaryStress]
-#    type = SolutionAux
-#    solution = soln
-#    variable = grainBoundaryStress
-#  [../]
-#[]
+[UserObjects]
+  [./soln]
+    type = SolutionUserObject
+    mesh = "gb_normal_stress.e"
+    system_variables = stress_hydro
+    timestep = 15 
+  [../]
+[]
+
+
+[AuxVariables]
+  [./grainBoundaryNormalStress]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[AuxKernels]
+  [./grainBoundaryStress]
+    type = SolutionAux
+    variable = grainBoundaryNormalStress
+    solution = soln
+    from_variable = stress_hydro
+  [../]
+[]
 
 [Variables]
   [C_ox]
@@ -48,13 +50,13 @@
     type = Diffusion
     variable = C_ox
   []
-#  [drift]
-#    type = GrainBoundaryDrift
-#    variable = C_ox
-#    #Vatom = 9.9E-30
-#    #T = 300
-#    
-#  []
+  [drift]
+    type = GrainBoundaryDrift
+    variable = C_ox
+    #Vatom = 9.9E-30  # Volume per atom
+    #T = 300          # Temperature
+    grain_boundary_normal_stress = grainBoundaryNormalStress
+  []
   [oxidation]
     type = SimpleOxidation
     variable = C_ox
@@ -70,11 +72,12 @@
     boundary = 'source'
     value = 1
   []
-#  [sinks]
-#    type = gbDiffusionFluxBC
-#    variable = C_ox
-#    boundary = 'sink'
-#  []
+  [sinks]
+    type = gbDiffusionFluxBC
+    variable = C_ox
+    grain_boundary_normal_stress = grainBoundaryNormalStress
+    boundary = 'sink'
+  []
 []
 
 [Executioner]

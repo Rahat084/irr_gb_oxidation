@@ -20,9 +20,10 @@ gbDiffusionFluxBC::validParams()
       "Does not impose a boundary condition; instead computes the boundary "
       "contribution corresponding to the current value of grad(u) and accumulates "
       "it in the residual vector.");
-  params.addRequiredParam<Real>("Vatom",9.9E-30, "Volume per atom in m3");
-  params.addRequiredParam<Real>("T",300, "Temperature");
-  params.addRequiredParam<Real>("k",1.380649E-23, "Boltzmann Constant m2kgs-2K-1");
+  params.addParam<Real>("Vatom",9.9E-30, "Volume per atom in m3");
+  params.addParam<Real>("T",300, "Temperature");
+  params.addParam<Real>("k",1.380649E-23, "Boltzmann Constant m2kgs-2K-1");
+  params.addRequiredCoupledVar("grain_boundary_normal_stress", "Normal Component of the grain boundary Stress");
   return params;
 }
 
