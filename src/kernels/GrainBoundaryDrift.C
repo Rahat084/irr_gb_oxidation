@@ -49,12 +49,12 @@ Real
 GrainBoundaryDrift::computeQpResidual()
 {
   // velocity * _grad_u[_qp] is actually doing a dot product
-  return _coeff * (_u[_qp] * (_gbNormalStressGradient[_qp] * _grad_test[_i][_qp]));
+  return -_coeff * (_u[_qp] * (_gbNormalStressGradient[_qp] * _grad_test[_i][_qp]));
 }
 
 Real
 GrainBoundaryDrift::computeQpJacobian()
 {
   // the partial derivative of _grad_u is just _grad_phi[_j]
-  return _coeff * (_phi[_j][_qp] * (_gbNormalStressGradient[_qp] * _grad_test[_i][_qp]));
+  return -_coeff * (_phi[_j][_qp] * (_gbNormalStressGradient[_qp] * _grad_test[_i][_qp]));
 }

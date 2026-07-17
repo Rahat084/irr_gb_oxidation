@@ -22,10 +22,9 @@
     type = SolutionUserObject
     mesh = "gb_normal_stress.e"
     system_variables = stress_hydro
-    timestep = 15 
+    timestep = 30 
   [../]
 []
-
 
 [AuxVariables]
   [./grainBoundaryNormalStress]
@@ -51,10 +50,14 @@
 []
 
 [Kernels]
+  [timeDerive]
+    type = DiffTimeDerivative
+    variable = C_ox
+#    Diffusion_coefficient = 1
+  []
   [diff]
     type = Diffusion
     variable = C_ox
-#    Diffusion_coefficient = 1
   []
   [drift]
     type = GrainBoundaryDrift
@@ -76,7 +79,7 @@
     type = DirichletBC
     variable = C_ox
     boundary = 'source'
-    value = 1
+    value =  1
   []
   [sinks]
     type = gbDiffusionFluxBC
@@ -87,8 +90,13 @@
 []
 
 [Executioner]
-  type = Steady
-  solve_type = 'PJFNK'
+  type = Transient
+  solve_type = NEWTON
+  start_time = 0.0
+  end_time = 10.0
+  dt = 0.5
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-8
 []
 
 [Outputs]
