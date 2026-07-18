@@ -1,7 +1,6 @@
-[GlobalParams]
-  Diffusion_coefficient = 1
-  Reaction_rate = 1
-[]
+# Gloal Parameters
+Diff_coef = 0.0001
+Reac_rate = 100
 
 [Mesh]
   [./fmg]
@@ -31,6 +30,14 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./mdot]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./m]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [AuxKernels]
@@ -39,6 +46,18 @@
     variable = grainBoundaryNormalStress
     solution = soln
     from_variable = stress_hydro
+  [../]
+  [./mdot]
+    type = ParsedAux
+    variable = mdot
+    expression = 'C_ox * ${fparse Reac_rate}'
+    coupled_variables = 'C_ox'
+  [../]
+  [./ TrapazoidalTimeIntegrator]
+    type = VariableTimeIntegrationAux
+    variable_to_integrate = mdot
+    variable = m
+    order = 1 
   [../]
 []
 
@@ -53,7 +72,7 @@
   [timeDerive]
     type = DiffTimeDerivative
     variable = C_ox
-#    Diffusion_coefficient = 1
+    Diffusion_coefficient = '${Diff_coef}'
   []
   [diff]
     type = Diffusion
@@ -62,15 +81,15 @@
   [drift]
     type = GrainBoundaryDrift
     variable = C_ox
-    #Vatom = 9.9E-30  # Volume per atom
+    #Vatom = 2.703E-30  # Volume per atom
     #T = 300          # Temperature
     grain_boundary_normal_stress = grainBoundaryNormalStress
   []
   [oxidation]
     type = SimpleOxidation
     variable = C_ox
-#    Diffusion_coefficient = 1
-#    Reaction_rate = 1
+    Diffusion_coefficient = '${Diff_coef}'
+    Reaction_rate = '${Reac_rate}'
   []
 []
 
@@ -79,7 +98,7 @@
     type = DirichletBC
     variable = C_ox
     boundary = 'source'
-    value =  1
+    value =  1.0
   []
   [sinks]
     type = gbDiffusionFluxBC
@@ -93,8 +112,8 @@
   type = Transient
   solve_type = NEWTON
   start_time = 0.0
-  end_time = 10.0
-  dt = 0.5
+  end_time = 1.0
+  dt = 0.025
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
 []
