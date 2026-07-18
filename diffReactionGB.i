@@ -1,5 +1,5 @@
 [GlobalParams]
-  Diffusion_coefficient = 0.5 
+  Diffusion_coefficient = 1
   Reaction_rate = 1
 []
 
@@ -17,14 +17,6 @@
   []
 []
 
-[UserObjects]
-  [./soln]
-    type = SolutionUserObject
-    mesh = "gb_normal_stress.e"
-    system_variables = stress_hydro
-    timestep = 30 
-  [../]
-[]
 
 [AuxVariables]
   [./grainBoundaryNormalStress]
@@ -35,10 +27,9 @@
 
 [AuxKernels]
   [./grainBoundaryStress]
-    type = SolutionAux
+    type = ConstantAux
     variable = grainBoundaryNormalStress
-    solution = soln
-    from_variable = stress_hydro
+    value = 0.0
   [../]
 []
 
@@ -50,19 +41,15 @@
 []
 
 [Kernels]
-  [timeDerive]
-    type = DiffTimeDerivative
-    variable = C_ox
-#    Diffusion_coefficient = 1
-  []
   [diff]
     type = Diffusion
     variable = C_ox
+#    Diffusion_coefficient = 1
   []
   [drift]
     type = GrainBoundaryDrift
     variable = C_ox
-    #Vatom = 2.703E-30  # Volume per atom
+    #Vatom = 9.9E-30  # Volume per atom
     #T = 300          # Temperature
     grain_boundary_normal_stress = grainBoundaryNormalStress
   []
@@ -79,7 +66,7 @@
     type = DirichletBC
     variable = C_ox
     boundary = 'source'
-    value =  1
+    value = 1
   []
   [sinks]
     type = gbDiffusionFluxBC
@@ -90,13 +77,8 @@
 []
 
 [Executioner]
-  type = Transient
-  solve_type = NEWTON
-  start_time = 0.0
-  end_time = 1.0
-  dt = 0.025
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-8
+  type = Steady
+  solve_type = 'PJFNK'
 []
 
 [Outputs]
