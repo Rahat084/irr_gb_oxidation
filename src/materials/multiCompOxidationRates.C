@@ -9,7 +9,7 @@
 
 #include "multiCompOxidationRates.h"
 
-registerMooseObject("ExampleApp", multiCompOxidationRates);
+registerMooseObject("MooseApp", multiCompOxidationRates);
 
 InputParameters
 multiCompOxidationRates::validParams()
@@ -50,18 +50,6 @@ multiCompOxidationRates::validParams()
   params.addCoupledVar(
       "Si_concentration",
       "local concentration of Si");
-  params.addCoupledVar(
-      "Cr2O4_concentration",
-      "local concentration of Cr2O4");
-  params.addCoupledVar(
-      "Fe3O4_concentration",
-      "local concentration of Fe3O4");
-  params.addCoupledVar(
-      "SiO2_concentration",
-      "local concentration of SiO2");
-  params.addCoupledVar(
-      "FeCr2O4_concentration",
-      "local concentration of FeCr2O4");
   return params;
 }
 
@@ -86,7 +74,7 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
     _R_SiO2(declareProperty<Real>("form_rate_SiO2")),
     _R_FeCr2O4(declareProperty<Real>("form_rate_FeCr2O4")),
     // Consumption rates of elements
-    _R_O(declareProperty<Real>("consump_rate_O")),
+    _R_O(declareADProperty<Real>("consump_rate_O")),
     _R_Fe(declareProperty<Real>("consump_rate_Fe")),
     _R_Cr(declareProperty<Real>("consump_rate_Cr")),
     _R_Si(declareProperty<Real>("consump_rate_Si"))
@@ -108,18 +96,18 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
 void
 multiCompOxidationRates::computeQpOxideFormationRates()
 {
-_R_Cr2O3[_qp] = _k_Cr2O3 * std::pow(_C_Cr[_qp], 2) * std::pow(_C_O[_qp], 1.5);
-_R_Fe3O4[_qp] = _k_Fe3O4 * std::pow(_C_Fe[_qp], 3) * std::pow(_C_O[_qp], 2);
-_R_SiO2[_qp] = _k_SiO2 * _C_Si[_qp] * _C_O[_qp];
-_R_FeCr2O4[_qp] = _k_FeCr2O4 * std::pow(_C_Fe[_qp], 1) *  std::pow(_C_Cr[_qp], 2) * std::pow(_C_O[_qp], 4);
+_R_Cr2O3[_qp] = _k_Cr2O3 * std::pow(_C_Cr[_qp], 2.0) * std::pow(_C_O[_qp], 3.0);
+_R_Fe3O4[_qp] = _k_Fe3O4 * std::pow(_C_Fe[_qp], 3.0) * std::pow(_C_O[_qp], 4.0);
+_R_SiO2[_qp] = _k_SiO2 * _C_Si[_qp] * std::pow(_C_O[_qp], 2.0);
+_R_FeCr2O4[_qp] = _k_FeCr2O4 * std::pow(_C_Fe[_qp], 1.0) *  std::pow(_C_Cr[_qp], 2.0) * std::pow(_C_O[_qp], 4.0);
 }
 
 void
 multiCompOxidationRates::computeQpElementConsumptionRates()
 {
-    _R_O[_qp] = 1.5 * _R_Cr2O3[_qp] + 2 * _R_Fe3O4[_qp] + _R_SiO2[_qp] + 4 * _R_FeCr2O4[_qp]; 
-    _R_Cr[_qp] = 2 * _R_Cr2O3[_qp] + 2 * _R_FeCr2O4[_qp]; 
-    _R_Fe[_qp] = 3 * _R_Fe3O4[_qp] + _R_FeCr2O4[_qp];
+    _R_O[_qp] = 3.0 * _R_Cr2O3[_qp] + 4.0 * _R_Fe3O4[_qp] + 2.0 * _R_SiO2[_qp] + 4.0 * _R_FeCr2O4[_qp]; 
+    _R_Cr[_qp] = 2.0 * _R_Cr2O3[_qp] + 2.0 * _R_FeCr2O4[_qp]; 
+    _R_Fe[_qp] = 3.0 * _R_Fe3O4[_qp] + _R_FeCr2O4[_qp];
     _R_Si[_qp] = _R_SiO2[_qp];  
 
 }

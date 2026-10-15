@@ -1,7 +1,6 @@
-[GlobalParams]
-  Diffusion_coefficient = 1
-  Reaction_rate = 1
-[]
+# Global Params
+Diff_coef = 1
+Reac_rate = 1
 
 [Mesh]
   [rectangle]
@@ -43,7 +42,7 @@
   [timeDerive]
     type = DiffTimeDerivative
     variable = C_ox
-#    Diffusion_coefficient = 1
+    Diffusion_coefficient = '${Diff_coef}'
   []
   [gb_diff]
     type = Diffusion
@@ -52,14 +51,14 @@
 #  [oxidation]
 #    type = CoefReaction
 #    variable = C_ox
-#    #coefficient = 6.1802E8 # -1
-#    coefficient = 1.89E4 # -1
+#    Diffusion_coefficient = '${Diff_coef}'
+#    Reaction_rate = '${Reac_rate}'
 #  []
   [oxidation]
     type = SimpleOxidation
     variable = C_ox
-#    Diffusion_coefficient = 1
-#    Reaction_rate = 1
+    Diffusion_coefficient = '${Diff_coef}'
+    Reaction_rate = '${Reac_rate}'
   []
 []
 

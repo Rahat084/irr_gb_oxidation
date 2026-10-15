@@ -30,17 +30,17 @@ private:
   const Real _k_SiO2;
   const Real _k_FeCr2O4;
 /// Coupled field variables
-  const VariableValue _C_O;
-  VariableValue _C_Fe;
-  VariableValue _C_Cr;
-  VariableValue _C_Si;
+  const VariableValue & _C_O;
+  const VariableValue & _C_Fe;
+  const VariableValue & _C_Cr;
+  const VariableValue & _C_Si;
   /// Oxid Formation rate properties
   MaterialProperty<Real> & _R_Cr2O3;
   MaterialProperty<Real> & _R_Fe3O4;
   MaterialProperty<Real> & _R_SiO2;
   MaterialProperty<Real> & _R_FeCr2O4;
   /// Element consumption rate properties
-  MaterialProperty<Real> & _R_O;
+  ADMaterialProperty<Real> & _R_O;
   MaterialProperty<Real> & _R_Fe;
   MaterialProperty<Real> & _R_Cr;
   MaterialProperty<Real> & _R_Si;
