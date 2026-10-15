@@ -50,6 +50,18 @@ multiCompOxidationRates::validParams()
   params.addCoupledVar(
       "Si_concentration",
       "local concentration of Si");
+  params.addCoupledVar(
+      "Cr2O4_concentration",
+      "local concentration of Cr2O4");
+  params.addCoupledVar(
+      "Fe3O4_concentration",
+      "local concentration of Fe3O4");
+  params.addCoupledVar(
+      "SiO2_concentration",
+      "local concentration of SiO2");
+  params.addCoupledVar(
+      "FeCr2O4_concentration",
+      "local concentration of FeCr2O4");
   return params;
 }
 
@@ -107,11 +119,8 @@ multiCompOxidationRates::computeQpElementConsumptionRates()
 {
     _R_O[_qp] = 1.5 * _R_Cr2O3[_qp] + 2 * _R_Fe3O4[_qp] + _R_SiO2[_qp] + 4 * _R_FeCr2O4[_qp]; 
     _R_Cr[_qp] = 2 * _R_Cr2O3[_qp] + 2 * _R_FeCr2O4[_qp]; 
-   _C_Cr[_qp] -= _R_Cr[_qp] * _dt; 
     _R_Fe[_qp] = 3 * _R_Fe3O4[_qp] + _R_FeCr2O4[_qp];
-   _C_Fe[_qp] -= _R_Fe[_qp] * _dt; 
     _R_Si[_qp] = _R_SiO2[_qp];  
-   _C_Si[_qp] -= _R_Si[_qp] * _dt; 
 
 }
 
