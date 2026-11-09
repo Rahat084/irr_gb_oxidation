@@ -18,18 +18,15 @@ multiCompOxidationRates::validParams()
 
   // Allow users to specify vectors defining the points of a piecewise function formed via linear
   // interpolation.
-  params.addRequiredParam<Real>(
-      "rate_coef_Cr2O3",
-      "Reaction Rate Coefficient of Cr2O3");
-  params.addRequiredParam<Real>(
-      "rate_coef_Fe3O4",
-      "Reaction Rate Coefficient of Fe3O4");
-  params.addRequiredParam<Real>(
-      "rate_coef_SiO2",
-      "Reaction Rate Coefficient of SiO2");
-  params.addRequiredParam<Real>(
-      "rate_coef_FeCr2O4",
-      "Reaction Rate Coefficient of FeCr2O4");
+  params.addRequiredParam<std::vector<std::string>>(
+      "oxide_phases",
+      "Name of the oxide phases");
+  params.addRequiredParam<std::vector<Real>>(
+      "oxidation_rate_coeffs",  "Reaction rate coefficeint of the phases");
+  params.addRequiredParam<std::vector<Real>>(
+      "oxide_elements",  "Consitutent elements in oxide phases");
+  params.addRequiredParam<std::vector<std::vector<Real>>>(
+      "stoichometric_coeffs",  "Stoicometric coefficients of each elements in the oxide phases");
 
   // Allow the user to specify which independent variable's gradient to use for calculating the
   // convection velocity property:
@@ -38,18 +35,12 @@ multiCompOxidationRates::validParams()
       "diffusion_gradient",
       "The gradient of this variable will be used to compute a velocity vector property.");
 */
-  params.addCoupledVar(
+  params.addRequiredCoupledVar(
       "O_concentration",
       "local concentration of oxygen");
-  params.addCoupledVar(
-      "Fe_concentration",
-      "local concentration of Fe");
-  params.addCoupledVar(
-      "Cr_concentration",
-      "local concentration of Cr");
-  params.addCoupledVar(
-      "Si_concentration",
-      "local concentration of Si");
+  params.addRequiredCoupledVar(
+      "element_concs",
+      "local concentration of the elements");
   return params;
 }
 
@@ -58,16 +49,14 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
     // Declare that this material is going to provide a Real value typed
     // material property named "diffusivity" that Kernels and other objects can use.
     // This property is "bound" to the class's "_diffusivity" member.
+    _oxide_phases(getParam<std::vector<std::string>>("oxide_phases")),
     // Reaction Rate Coefficients
-    _k_Cr2O3(getParam<Real>("rate_coef_Cr2O3")),
-    _k_Fe3O4(getParam<Real>("rate_coef_Fe3O4")),
-    _k_SiO2(getParam<Real>("rate_coef_SiO2")),
-    _k_FeCr2O4(getParam<Real>("rate_coef_FeCr2O4")),
+    _oxidation_rate_coeffs(getParam<std::vector<Real>>("oxidation_rate_coeffs")),
+    _oxide_elements(getParam<std::vector<std::string>>("oxide_phases")),
+    _stoichometric_coeffs(getParam<std::vector<std::vector<Real>>>("stoichometric_coeffs")),
     // Coupled Variables 
     _C_O(coupledValue("O_concentration")),
-    _C_Fe(coupledValue("Fe_concentration")),
-    _C_Cr(coupledValue("Cr_concentration")),
-    _C_Si(coupledValue("Si_concentration")),
+    _C_elements(coupledValues("element_concentrations")),
     // Formation rate of Oxides
     _R_Cr2O3(declareProperty<Real>("form_rate_Cr2O3")),
     _R_Fe3O4(declareProperty<Real>("form_rate_Fe3O4")),
@@ -91,8 +80,12 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
                     getParam<std::vector<Real>>("dependent_vals"))
     */
 {
-}
+      for (const auto & name : _oxide_phases)
+    _form_rate_oxides.push_back(&declareADProperty<RealVectorValue>("form_rate" + name));
 
+      for (const auto & name : _oxide_elements)
+    _consum_rate_elements.push_back(&declareADProperty<RealVectorValue>("consum_rate" + name));
+}
 void
 multiCompOxidationRates::computeQpOxideFormationRates()
 {
