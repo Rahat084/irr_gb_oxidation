@@ -43,6 +43,7 @@ multiCompOxidationRates::validParams()
   params.addRequiredCoupledVar(
       "element_concs",
       "local concentration of the elements");
+  params.addParam<bool>("reaction_order", false, "Enable reaction order consideration to calculate rate of oxide formation");
   return params;
 }
 
@@ -57,7 +58,8 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
     _oxide_elements(getParam<std::vector<std::string>>("oxide_elements")),
     _stoichometric_coeffs(getParam<std::vector<std::vector<Real>>>("stoichometric_coeffs")),
     // Coupled Variables 
-    _C_elements(coupledValues("element_concs"))
+    _C_elements(coupledValues("element_concs")),
+    _reac_order(getParam<bool>("reaction_order"))
     // Formation rate of Oxides
     /*
     _R_Cr2O3(declareProperty<Real>("form_rate_Cr2O3")),
@@ -105,8 +107,14 @@ _R_FeCr2O4[_qp] = _k_FeCr2O4 * _C_Fe[_qp] * _C_Cr[_qp] * _C_O[_qp];
 
 	for  (const auto j : make_range(_oxide_elements.size()))
 	    {
+	if (_reac_order == true)
+		(*_form_rate_oxides[i])[_qp] *= std::pow((*_C_elements[j])[_qp], _stoichometric_coeffs[i][j]) ;
+
+	else
+	{ //No Reaction Order
 	    if ( _stoichometric_coeffs[i][j] > 0.0)
 		(*_form_rate_oxides[i])[_qp] *= (*_C_elements[j])[_qp];
+	    }
 	    }
 	    }
 

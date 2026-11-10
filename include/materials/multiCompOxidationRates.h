@@ -29,6 +29,7 @@ private:
   const std::vector<std::string> _oxide_elements;
   std::vector<std::vector<Real>> _stoichometric_coeffs;
   std::vector<const VariableValue *> _C_elements;
+  const bool _reac_order;
    std::vector<ADMaterialProperty<Real>*> _form_rate_oxides;
    std::vector<ADMaterialProperty<Real>*> _consump_rate_elements;
   /// Reaction rate coefficients
