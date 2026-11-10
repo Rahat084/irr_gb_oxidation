@@ -24,7 +24,15 @@ protected:
   void computeQpElementConsumptionRates();
 
 private:
+  const std::vector<std::string> _oxide_phases;
+  std::vector<Real> _oxidation_rate_coeffs;
+  const std::vector<std::string> _oxide_elements;
+  std::vector<std::vector<Real>> _stoichometric_coeffs;
+  std::vector<const VariableValue *> _C_elements;
+   std::vector<ADMaterialProperty<Real>*> _form_rate_oxides;
+   std::vector<ADMaterialProperty<Real>*> _consump_rate_elements;
   /// Reaction rate coefficients
+  /*
   const Real _k_Cr2O3;
   const Real _k_Fe3O4;
   const Real _k_SiO2;
@@ -44,5 +52,6 @@ private:
   MaterialProperty<Real> & _R_Fe;
   MaterialProperty<Real> & _R_Cr;
   MaterialProperty<Real> & _R_Si;
+  */
  
 };

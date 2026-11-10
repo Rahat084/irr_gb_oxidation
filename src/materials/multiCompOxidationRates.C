@@ -23,7 +23,7 @@ multiCompOxidationRates::validParams()
       "Name of the oxide phases");
   params.addRequiredParam<std::vector<Real>>(
       "oxidation_rate_coeffs",  "Reaction rate coefficeint of the phases");
-  params.addRequiredParam<std::vector<Real>>(
+  params.addRequiredParam<std::vector<std::string>>(
       "oxide_elements",  "Consitutent elements in oxide phases");
   params.addRequiredParam<std::vector<std::vector<Real>>>(
       "stoichometric_coeffs",  "Stoicometric coefficients of each elements in the oxide phases");
@@ -35,9 +35,11 @@ multiCompOxidationRates::validParams()
       "diffusion_gradient",
       "The gradient of this variable will be used to compute a velocity vector property.");
 */
+  /*
   params.addRequiredCoupledVar(
       "O_concentration",
       "local concentration of oxygen");
+      */
   params.addRequiredCoupledVar(
       "element_concs",
       "local concentration of the elements");
@@ -52,12 +54,12 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
     _oxide_phases(getParam<std::vector<std::string>>("oxide_phases")),
     // Reaction Rate Coefficients
     _oxidation_rate_coeffs(getParam<std::vector<Real>>("oxidation_rate_coeffs")),
-    _oxide_elements(getParam<std::vector<std::string>>("oxide_phases")),
+    _oxide_elements(getParam<std::vector<std::string>>("oxide_elements")),
     _stoichometric_coeffs(getParam<std::vector<std::vector<Real>>>("stoichometric_coeffs")),
     // Coupled Variables 
-    _C_O(coupledValue("O_concentration")),
-    _C_elements(coupledValues("element_concentrations")),
+    _C_elements(coupledValues("element_concs"))
     // Formation rate of Oxides
+    /*
     _R_Cr2O3(declareProperty<Real>("form_rate_Cr2O3")),
     _R_Fe3O4(declareProperty<Real>("form_rate_Fe3O4")),
     _R_SiO2(declareProperty<Real>("form_rate_SiO2")),
@@ -67,6 +69,7 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
     _R_Fe(declareProperty<Real>("consump_rate_Fe")),
     _R_Cr(declareProperty<Real>("consump_rate_Cr")),
     _R_Si(declareProperty<Real>("consump_rate_Si"))
+    */
 
     // Also declare a second "convection_velocity" RealGradient value typed property.
     //_convection_velocity(declareProperty<RealGradient>("convection_velocity")),
@@ -81,27 +84,49 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
     */
 {
       for (const auto & name : _oxide_phases)
-    _form_rate_oxides.push_back(&declareADProperty<RealVectorValue>("form_rate" + name));
+    _form_rate_oxides.push_back(&declareADProperty<Real>("form_rate_" + name));
 
       for (const auto & name : _oxide_elements)
-    _consum_rate_elements.push_back(&declareADProperty<RealVectorValue>("consum_rate" + name));
+    _consump_rate_elements.push_back(&declareADProperty<Real>("consump_rate_" + name));
 }
+
 void
 multiCompOxidationRates::computeQpOxideFormationRates()
 {
+    /*
 _R_Cr2O3[_qp] = _k_Cr2O3 * _C_Cr[_qp] * _C_O[_qp];
 _R_Fe3O4[_qp] = _k_Fe3O4 * _C_Fe[_qp] * _C_O[_qp];
 _R_SiO2[_qp] = _k_SiO2 * _C_Si[_qp] * _C_O[_qp];
 _R_FeCr2O4[_qp] = _k_FeCr2O4 * _C_Fe[_qp] * _C_Cr[_qp] * _C_O[_qp];
+*/
+    for  (const auto i : make_range(_oxide_phases.size()))
+	    {
+    (*_form_rate_oxides[i])[_qp] = _oxidation_rate_coeffs[i];
+
+	for  (const auto j : make_range(_oxide_elements.size()))
+	    {
+	    if ( _stoichometric_coeffs[i][j] > 0.0)
+		(*_form_rate_oxides[i])[_qp] *= (*_C_elements[j])[_qp];
+	    }
+	    }
+
 }
 
 void
 multiCompOxidationRates::computeQpElementConsumptionRates()
 {
+/*
     _R_O[_qp] = 3.0 * _R_Cr2O3[_qp] + 4.0 * _R_Fe3O4[_qp] + 2.0 * _R_SiO2[_qp] + 4.0 * _R_FeCr2O4[_qp]; 
     _R_Cr[_qp] = 2.0 * _R_Cr2O3[_qp] + 2.0 * _R_FeCr2O4[_qp]; 
     _R_Fe[_qp] = 3.0 * _R_Fe3O4[_qp] + _R_FeCr2O4[_qp];
     _R_Si[_qp] = _R_SiO2[_qp];  
+    */
+for (const auto i : make_range(_oxide_elements.size()))
+{
+    (*_consump_rate_elements[i])[_qp] = 0.0;
+for (const auto j : make_range(_oxide_phases.size()))
+    (*_consump_rate_elements[i])[_qp] += _stoichometric_coeffs[j][i] * (*_form_rate_oxides[j])[_qp];
+}
 
 }
 
