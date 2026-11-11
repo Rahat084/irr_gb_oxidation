@@ -90,6 +90,9 @@ multiCompOxidationRates::multiCompOxidationRates(const InputParameters & paramet
 
       for (const auto & name : _oxide_elements)
     _consump_rate_elements.push_back(&declareADProperty<Real>("consump_rate_" + name));
+
+      if (_stoichometric_coeffs.size() != _oxide_phases.size() || _stoichometric_coeffs[0].size() != _oxide_elements.size())
+	  paramError(" Size mismatch of the stochometric coefficients");
 }
 
 void
